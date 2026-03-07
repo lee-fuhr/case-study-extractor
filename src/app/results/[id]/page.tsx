@@ -203,21 +203,37 @@ export default function ResultsPage() {
         </div>
       </section>
 
-      {/* Create Another */}
+      {/* Create Another + Retainer */}
       <section className="px-4 md:px-8 lg:px-12 py-16 bg-[var(--accent)]">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-display text-4xl mb-4 text-[var(--accent-foreground)]">
-            Document another project?
-          </h2>
-          <p className="text-[var(--accent-foreground)] text-xl mb-8">
-            Turn more of your completed work into sales collateral.
-          </p>
-          <a
-            href="/"
-            className="btn-reversed text-lg"
-          >
-            Create another case study →
-          </a>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-display text-3xl mb-4 text-[var(--accent-foreground)]">
+                Document another project?
+              </h2>
+              <p className="text-[var(--accent-foreground)] opacity-80 text-lg mb-6">
+                Turn more of your completed work into sales collateral.
+              </p>
+              <a href="/" className="btn-reversed inline-block">
+                Create another case study →
+              </a>
+            </div>
+            <div className="border-l border-[var(--accent-foreground)]/20 pl-12">
+              <p className="text-[var(--accent-foreground)] opacity-60 text-xs font-bold tracking-wider mb-3">NEED THE WHOLE THING DONE?</p>
+              <h3 className="text-[var(--accent-foreground)] text-xl font-semibold mb-3">
+                I build full messaging systems for manufacturers.
+              </h3>
+              <p className="text-[var(--accent-foreground)] opacity-80 text-sm mb-4">
+                Website, proposals, case studies — the whole stack. Starts at $750/month. Most clients see ROI in month one.
+              </p>
+              <a
+                href="mailto:hi@leefuhr.com?subject=Interested in working together — saw Case Study Extractor"
+                className="text-[var(--accent-foreground)] text-sm underline hover:no-underline"
+              >
+                Email Lee →
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
