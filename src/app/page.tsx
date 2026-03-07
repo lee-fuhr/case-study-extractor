@@ -314,7 +314,7 @@ export default function HomePage() {
       {/* What you get */}
       <section className="px-4 md:px-8 lg:px-12 py-20 md:py-28 bg-[var(--muted)]">
         <div className="max-w-6xl mx-auto">
-          <p className="text-label mb-4">WHAT YOU GET FOR $150</p>
+          <p className="text-label mb-4">WHAT YOU GET FOR $147</p>
           <h2 className="text-section text-4xl md:text-5xl lg:text-6xl mb-12">
             Three formats.
             <br />
@@ -382,7 +382,7 @@ export default function HomePage() {
             <div className="text-center">
               <div className="text-6xl mb-4">🎯</div>
               <p className="text-section text-lg mb-2">4. Download</p>
-              <p className="text-body text-sm">$150 unlocks PDF, proposal insert, website copy.</p>
+              <p className="text-body text-sm">$147 unlocks PDF, proposal insert, website copy.</p>
             </div>
           </div>
         </div>
@@ -393,7 +393,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <p className="text-label mb-4 text-center">HOW IT WORKS</p>
           <h2 className="text-section text-4xl md:text-5xl mb-6 text-center">
-            Preview free. <span className="text-[var(--muted-foreground)]">Full case study $150.</span>
+            Preview free. <span className="text-[var(--muted-foreground)]">Full case study $147.</span>
           </h2>
           <p className="text-body text-lg text-[var(--muted-foreground)] text-center mb-16 max-w-2xl mx-auto">
             The free preview shows you everything we found in your files. The full case study is what marketing agencies charge $1,500+ to write.
@@ -440,7 +440,7 @@ export default function HomePage() {
                 COMPLETE
               </div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="bg-[var(--accent)] text-[var(--accent-foreground)] px-3 py-1 text-sm font-bold">$150</span>
+                <span className="bg-[var(--accent)] text-[var(--accent-foreground)] px-3 py-1 text-sm font-bold">$147</span>
                 <span className="text-section text-xl">Full case study</span>
               </div>
               <p className="text-body text-sm text-[var(--muted-foreground)] mb-6">One closed deal = pays for 50+ case studies</p>
@@ -593,7 +593,7 @@ export default function HomePage() {
             Stop losing deals to better storytelling
           </h2>
           <p className="text-[var(--accent-foreground)] text-xl mb-8">
-            Upload your project files. Preview free. Full case study $150.
+            Upload your project files. Preview free. Full case study $147.
           </p>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
