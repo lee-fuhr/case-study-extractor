@@ -1,6 +1,6 @@
 /**
  * Stripe Checkout API Route
- * Case Study Extractor - $150
+ * Case Study Extractor - $147
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const TOOL_NAME = 'Case Study Extractor';
-const TOOL_PRICE = 150;
+const TOOL_PRICE = 147;
 
 export async function POST(request: NextRequest) {
   try {
