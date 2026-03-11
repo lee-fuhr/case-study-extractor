@@ -1,52 +1,105 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { extractProjectData, generateCaseStudy, formatCaseStudy, ProjectData, CaseStudy, CaseStudyFormats } from '@/lib/extraction-engine'
+import { useParams, useRouter } from 'next/navigation'
+import jsPDF from 'jspdf'
+import type { CaseStudy, CaseStudyFormats } from '@/lib/extraction-engine'
 
 export default function ResultsPage() {
   const params = useParams()
   const id = params.id as string
+  const router = useRouter()
 
-  const [data, setData] = useState<ProjectData | null>(null)
   const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null)
   const [formats, setFormats] = useState<CaseStudyFormats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeFormat, setActiveFormat] = useState<'onePager' | 'proposalInsert' | 'websiteCopy'>('onePager')
+  const [copiedMsg, setCopiedMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadData = async () => {
-      const mockFiles: File[] = []
-      const projectData = await extractProjectData(mockFiles)
-      const study = generateCaseStudy(projectData)
-      const formattedStudy = formatCaseStudy(study)
-
-      setData(projectData)
-      setCaseStudy(study)
-      setFormats(formattedStudy)
-      setLoading(false)
-    }
-
-    loadData()
-  }, [id])
+    fetch(`/api/results/${id}`)
+      .then(r => {
+        if (r.status === 402) {
+          router.replace(`/preview/${id}`)
+          return null
+        }
+        return r.json()
+      })
+      .then(data => {
+        if (!data) return
+        setFormats(data.formats)
+        setCaseStudy(data.caseStudy)
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [id, router])
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text)
-    alert('Copied to clipboard!')
+    setCopiedMsg('Copied!')
+    setTimeout(() => setCopiedMsg(null), 2000)
   }
 
-  const handleDownload = (format: 'onePager' | 'proposalInsert' | 'websiteCopy') => {
-    if (!formats) return
+  const handleDownload = () => {
+    if (!caseStudy) return
 
-    const content = formats[format]
-    const filename = `case-study-${format}.txt`
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(url)
+    const doc = new jsPDF({ format: 'letter', unit: 'pt' })
+    const margin = 72 // 1 inch
+    const width = doc.internal.pageSize.getWidth() - margin * 2
+    let y = margin
+
+    // Title
+    doc.setFontSize(24)
+    doc.setFont('helvetica', 'bold')
+    doc.text(caseStudy.title || 'Case Study', margin, y)
+    y += 36
+
+    // Client & metadata
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    if (caseStudy.client) { doc.text(`Client: ${caseStudy.client}`, margin, y); y += 20 }
+    if (caseStudy.metadata?.industry) { doc.text(`Industry: ${caseStudy.metadata.industry}`, margin, y); y += 20 }
+    y += 16
+
+    // Challenge
+    if (caseStudy.challenge) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('The Challenge', margin, y); y += 20
+      doc.setFont('helvetica', 'normal')
+      const challengeLines = doc.splitTextToSize(caseStudy.challenge, width)
+      doc.text(challengeLines, margin, y); y += challengeLines.length * 16 + 16
+    }
+
+    // Approach
+    if (caseStudy.approach) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Our Approach', margin, y); y += 20
+      doc.setFont('helvetica', 'normal')
+      const approachLines = doc.splitTextToSize(caseStudy.approach, width)
+      doc.text(approachLines, margin, y); y += approachLines.length * 16 + 16
+    }
+
+    // Results
+    if (caseStudy.results?.length) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Results', margin, y); y += 20
+      doc.setFont('helvetica', 'normal')
+      for (const result of caseStudy.results) {
+        doc.text(`• ${result}`, margin + 12, y); y += 16
+      }
+      y += 16
+    }
+
+    // Testimonial
+    if (caseStudy.quote) {
+      doc.setFont('helvetica', 'italic')
+      const testimonialLines = doc.splitTextToSize(`"${caseStudy.quote}"`, width)
+      doc.text(testimonialLines, margin, y)
+    }
+
+    const filename = (caseStudy.title || 'case-study').replace(/\s+/g, '-').toLowerCase()
+    doc.save(`${filename}.pdf`)
   }
 
   if (loading || !caseStudy || !formats) {
@@ -54,7 +107,10 @@ export default function ResultsPage() {
       <main className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">⏳</div>
-          <p className="text-body">Loading your case study...</p>
+          {error
+            ? <p className="text-body" style={{ color: 'var(--error)' }}>{error}</p>
+            : <p className="text-body">Loading your case study...</p>
+          }
         </div>
       </main>
     )
@@ -121,7 +177,7 @@ export default function ResultsPage() {
       <section className="px-4 md:px-8 lg:px-12 py-16">
         <div className="max-w-5xl mx-auto">
           {/* Action Buttons */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => handleCopy(formats[activeFormat])}
               className="btn-outline"
@@ -129,11 +185,14 @@ export default function ResultsPage() {
               Copy to clipboard
             </button>
             <button
-              onClick={() => handleDownload(activeFormat)}
+              onClick={handleDownload}
               className="btn-kinetic"
             >
-              Download
+              Download PDF
             </button>
+            {copiedMsg && (
+              <span className="text-sm" style={{ color: 'var(--success)' }}>{copiedMsg}</span>
+            )}
           </div>
 
           {/* Format Description */}
@@ -219,19 +278,22 @@ export default function ResultsPage() {
               </a>
             </div>
             <div className="border-l border-[var(--accent-foreground)]/20 pl-12">
-              <p className="text-[var(--accent-foreground)] opacity-60 text-xs font-bold tracking-wider mb-3">NEED THE WHOLE THING DONE?</p>
+              <p className="text-[var(--accent-foreground)] opacity-60 text-xs font-bold tracking-wider mb-3">YOUR WEBSITE SHOULD BE EARNING THIS CASE STUDY</p>
               <h3 className="text-[var(--accent-foreground)] text-xl font-semibold mb-3">
-                I build full messaging systems for manufacturers.
+                Get the full messaging audit. $400.
               </h3>
               <p className="text-[var(--accent-foreground)] opacity-80 text-sm mb-4">
-                Website, proposals, case studies — the whole stack. Starts at $750/month. Most clients see ROI in month one.
+                Every page. 15–20 specific rewrites. If buyers can&apos;t find your proof points, the case study won&apos;t matter.
               </p>
               <a
-                href="mailto:hi@leefuhr.com?subject=Interested in working together — saw Case Study Extractor"
+                href="https://websiteaudit.leefuhr.com"
                 className="text-[var(--accent-foreground)] text-sm underline hover:no-underline"
               >
-                Email Lee →
+                Get the audit →
               </a>
+              <p className="text-[var(--accent-foreground)] opacity-40 text-xs mt-4">
+                Or <a href="https://cal.com/leefuhr/30i" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">book a call</a> if you want the whole thing rebuilt — $750/month.
+              </p>
             </div>
           </div>
         </div>
